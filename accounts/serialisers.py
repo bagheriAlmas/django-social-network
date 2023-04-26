@@ -10,6 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(required=True)
     password2 = serializers.CharField(required=True)
     '''we can define first_name and last_name here. but i prefer to define these in extera_kwargs'''
+
     # first_name = serializers.CharField(required=False)
     # last_name = serializers.CharField(required=False)
 
@@ -29,7 +30,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'password': 'passwords does not match.'
             })
-        return attrs
+        return super(RegisterSerializer, self).validate(attrs)
 
     def create(self, validated_data):
         user = User.objects.create(
