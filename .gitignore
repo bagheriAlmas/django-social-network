@@ -14,3 +14,4 @@ ENV/
 env.bak/
 venv.bak/
 .idea
+social_network/local_settings.py
