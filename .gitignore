@@ -16,3 +16,5 @@ venv.bak/
 .idea
 social_network/local_settings.py
 /social_network/wsgi.py
+migrations
+files
