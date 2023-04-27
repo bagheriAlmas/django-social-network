@@ -10,7 +10,7 @@ class PostFileInline(admin.TabularInline):
 
 class PostAdmin(admin.ModelAdmin):
     model = Post
-    list_display = ['title', 'is_active', 'is_public', 'created_at', 'updated_at']
+    list_display = ['pk','title', 'is_active', 'is_public', 'created_at', 'updated_at']
     inlines = [PostFileInline, ]
 
 
