@@ -16,6 +16,7 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'posts.apps.PostsConfig',
+    'friendships.apps.FriendshipsConfig'
 
     'rest_framework',
     'rest_framework_simplejwt',
