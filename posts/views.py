@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from posts.models import Post
-from posts.serializers import PostSerializer
+from posts.serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 
 # Create your views here.
@@ -36,3 +36,59 @@ class PostListView(APIView):
         posts = Post.objects.filter(is_active=True)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+
+class CommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_post(self, pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return False
+
+    def get(self, request, pk):
+        post = self.get_post(pk)
+        if not post:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        comments = post.comments.filter(is_approved=True)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, pk):
+        post = self.get_post(pk)
+        if not post:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(post=post, user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LikeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_post(self, pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return False
+
+    def get(self, request, pk):
+        post = self.get_post(pk)
+        if not post:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        likes = post.likes.filter(is_liked=True).count()
+        # serializer = CommentSerializer(comments, many=True)
+        return Response({'likes': likes}, status=status.HTTP_200_OK)
+
+    def post(self, request, pk):
+        post = self.get_post(pk)
+        if not post:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = LikeSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(post=post, user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
