@@ -30,3 +30,15 @@ class RequestView(APIView):
         user = get_object_or_404(User, pk=user_id)
         Friendship.objects.get_or_create(request_from=request.user, request_to=user)
         return Response({'detail': 'Request Send'}, status=status.HTTP_201_CREATED)
+
+
+class RequestListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        friendship = Friendship.objects.filter(request_to=request.user, is_accepted=False)
+        users = [fr.request_from for fr in friendship]
+        serializer = UserListSerializer(users, many=True)
+        return Response(serializer.data)
+
+
