@@ -1,3 +1,32 @@
+from django.contrib.auth import get_user_model
+
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
 
-# Create your views here.
+from friendships.models import Friendship
+from friendships.serializers import UserListSerializer
+
+User = get_user_model()
+
+
+class UserListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        users = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
+        serializer = UserListSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class RequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_id = request.data.get('user')
+        user = get_object_or_404(User, pk=user_id)
+        Friendship.objects.get_or_create(request_from=request.user, request_to=user)
+        return Response({'detail': 'Request Send'}, status=status.HTTP_201_CREATED)
