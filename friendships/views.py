@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -51,9 +52,23 @@ class AcceptView(APIView):
             user = User.objects.get(pk=user_id)
             friendship = Friendship.objects.get(request_from=user, request_to=request.user, is_accepted=False)
         except (User.DoesNotExist, Friendship.DoesNotExist):
-            return Response({'detail': 'user not found'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'user not found'}, status=status.HTTP_400_BAD_REQUEST)
 
         friendship.is_accepted = True
         friendship.save()
 
         return Response({'detail': 'Connected'}, status=status.HTTP_200_OK)
+
+
+class FriendListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        friendship = Friendship.objects.filter(
+            Q(request_from_id=request.user) | Q(request_to_id=request.user),
+            is_accepted=True
+        )
+
+        users = [fr.request_from for fr in friendship]
+        serializer = UserListSerializer(users, many=True)
+        return Response(serializer.data)
