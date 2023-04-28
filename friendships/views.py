@@ -42,3 +42,18 @@ class RequestListView(APIView):
         return Response(serializer.data)
 
 
+class AcceptView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_id = request.data.get('user')
+        try:
+            user = User.objects.get(pk=user_id)
+            friendship = Friendship.objects.get(request_from=user, request_to=request.user, is_accepted=False)
+        except (User.DoesNotExist, Friendship.DoesNotExist):
+            return Response({'detail': 'user not found'},status=status.HTTP_400_BAD_REQUEST)
+
+        friendship.is_accepted = True
+        friendship.save()
+
+        return Response({'detail': 'Connected'}, status=status.HTTP_200_OK)
