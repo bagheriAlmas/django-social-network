@@ -14,9 +14,10 @@ class Country(models.Model):
         verbose_name_plural = "Countries"
         db_table = 'countries'
 
-
+    def __str__(self):
+        return self.name
 class Profile(models.Model):
-    user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, blank=True, null=True, unique=True)
     country = models.ForeignKey(to=Country, on_delete=models.CASCADE)
     avatar = models.ImageField(blank=True, upload_to='avatars')
@@ -26,6 +27,8 @@ class Profile(models.Model):
         verbose_name_plural = 'Profiles'
         db_table = 'profiles'
 
+    def __str__(self):
+        return self.user.username
 
 class Device(models.Model):
     DEVICE_TYPE_CHOICES = ((1, 'web'), (2, 'ios'), (3, 'android'), (4, 'pc'))
