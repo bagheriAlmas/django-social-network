@@ -18,7 +18,11 @@ class UserListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        users = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
+        q = request.query_params.get('q')
+        if q:
+            users = User.objects.filter(username__icontains=q)
+        else:
+            users = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
         serializer = UserListSerializer(users, many=True)
         return Response(serializer.data)
 
